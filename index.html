@@ -1,170 +1,153 @@
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const scoreElement = document.getElementById('score');
 
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>Zumbi Shooter Simples</title>
-    <style>
-        body { margin: 0; overflow: hidden; background: #1a1a1a; font-family: sans-serif; }
-        canvas { display: block; background: #2c3e50; }
-        #ui { position: absolute; top: 20px; left: 20px; color: white; font-size: 24px; pointer-events: none; }
-    </style>
-</head>
-<body>
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-    <div id="ui">Pontos: <span id="score">0</span></div>
-    <canvas id="gameCanvas"></canvas>
+let score = 0;
+let gameActive = true;
 
-    <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const scoreElement = document.getElementById('score');
+const player = {
+    x: canvas.width / 2,
+    y: canvas.height / 2,
+    radius: 15,
+    color: '#3498db',
+    speed: 5 // Velocidade de movimento
+};
 
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+// Objeto para monitorar as teclas pressionadas
+const keys = {
+    w: false,
+    a: false,
+    s: false,
+    d: false
+};
 
-        let score = 0;
-        let gameActive = true;
+const projectiles = [];
+const enemies = [];
 
-        const player = {
-            x: canvas.width / 2,
-            y: canvas.height / 2,
-            radius: 15,
-            color: '#3498db'
-        };
+// Listeners para o teclado
+window.addEventListener('keydown', (e) => {
+    const key = e.key.toLowerCase();
+    if (keys.hasOwnProperty(key)) keys[key] = true;
+});
 
-        const projectiles = [];
-        const enemies = [];
+window.addEventListener('keyup', (e) => {
+    const key = e.key.toLowerCase();
+    if (keys.hasOwnProperty(key)) keys[key] = false;
+});
 
-        // Capturar posição do mouse
-        let mouseX = canvas.width / 2;
-        let mouseY = canvas.height / 2;
+// O mouse agora serve apenas para mirar e atirar
+let mouseX = 0;
+let mouseY = 0;
+window.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+});
 
-        window.addEventListener('mousemove', (e) => {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-        });
+window.addEventListener('mousedown', () => {
+    if(!gameActive) return;
+    const angle = Math.atan2(mouseY - player.y, mouseX - player.x);
+    projectiles.push({
+        x: player.x,
+        y: player.y,
+        vx: Math.cos(angle) * 8,
+        vy: Math.sin(angle) * 8
+    });
+});
 
-        // Atirar ao clicar
-        window.addEventListener('mousedown', () => {
-            if(!gameActive) return;
-            
-            const angle = Math.atan2(mouseY - player.y, mouseX - player.x);
-            projectiles.push({
-                x: player.x,
-                y: player.y,
-                vx: Math.cos(angle) * 8,
-                vy: Math.sin(angle) * 8
-            });
-        });
+function spawnEnemy() {
+    if (!gameActive) return;
+    const radius = 15;
+    let x, y;
+    if (Math.random() < 0.5) {
+        x = Math.random() < 0.5 ? 0 - radius : canvas.width + radius;
+        y = Math.random() * canvas.height;
+    } else {
+        x = Math.random() * canvas.width;
+        y = Math.random() < 0.5 ? 0 - radius : canvas.height + radius;
+    }
+    enemies.push({ x, y, speed: 2 });
+}
 
-        function spawnEnemy() {
-            const radius = 15;
-            let x, y;
+setInterval(spawnEnemy, 1000);
 
-            if (Math.random() < 0.5) {
-                x = Math.random() < 0.5 ? 0 - radius : canvas.width + radius;
-                y = Math.random() * canvas.height;
-            } else {
-                x = Math.random() * canvas.width;
-                y = Math.random() < 0.5 ? 0 - radius : canvas.height + radius;
+function update() {
+    if (!gameActive) return;
+
+    // Movimentação WASD
+    if (keys.w && player.y > 0) player.y -= player.speed;
+    if (keys.s && player.y < canvas.height) player.y += player.speed;
+    if (keys.a && player.x > 0) player.x -= player.speed;
+    if (keys.d && player.x < canvas.width) player.x += player.speed;
+
+    // Atualizar Projéteis
+    projectiles.forEach((p, index) => {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0 || p.x > canvas.width || p.y < 0 || p.y > canvas.height) {
+            projectiles.splice(index, 1);
+        }
+    });
+
+    // Atualizar Inimigos (Zumbis seguem o jogador)
+    enemies.forEach((en, enIdx) => {
+        const angle = Math.atan2(player.y - en.y, player.x - en.x);
+        en.x += Math.cos(angle) * en.speed;
+        en.y += Math.sin(angle) * en.speed;
+
+        // Colisão com Jogador
+        if (Math.hypot(player.x - en.x, player.y - en.y) < 25) {
+            gameActive = false;
+            alert("Zumbis te pegaram! Pontos: " + score);
+            location.reload();
+        }
+
+        // Colisão com Projétil
+        projectiles.forEach((p, pIdx) => {
+            if (Math.hypot(p.x - en.x, p.y - en.y) < 20) {
+                enemies.splice(enIdx, 1);
+                projectiles.splice(pIdx, 1);
+                score += 10;
+                scoreElement.innerText = score;
             }
+        });
+    });
+}
 
-            const angle = Math.atan2(player.y - y, player.x - x);
-            enemies.push({ x, y, vx: Math.cos(angle) * 2, vy: Math.sin(angle) * 2 });
-        }
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        setInterval(() => { if(gameActive) spawnEnemy(); }, 1000);
+    // Jogador
+    ctx.fillStyle = player.color;
+    ctx.fillRect(player.x - 15, player.y - 15, 30, 30);
 
-        function update() {
-            if (!gameActive) return;
+    // Mira (uma linha sutil indicando onde você atira)
+    ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+    ctx.beginPath();
+    ctx.moveTo(player.x, player.y);
+    ctx.lineTo(mouseX, mouseY);
+    ctx.stroke();
 
-            // Mover jogador em direção ao mouse (suave)
-            player.x += (mouseX - player.x) * 0.05;
-            player.y += (mouseY - player.y) * 0.05;
+    // Projéteis
+    ctx.fillStyle = '#f1c40f';
+    projectiles.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+        ctx.fill();
+    });
 
-            // Atualizar Projéteis
-            projectiles.forEach((p, index) => {
-                p.x += p.vx;
-                p.y += p.vy;
-                if (p.x < 0 || p.x > canvas.width || p.y < 0 || p.y > canvas.height) {
-                    projectiles.splice(index, 1);
-                }
-            });
+    // Inimigos
+    ctx.fillStyle = '#2ecc71';
+    enemies.forEach(en => {
+        ctx.fillRect(en.x - 15, en.y - 15, 30, 30);
+    });
 
-            // Atualizar Inimigos
-            enemies.forEach((en, enIdx) => {
-                en.x += en.vx;
-                en.y += en.vy;
-
-                // Colisão Inimigo vs Jogador
-                const distPlayer = Math.hypot(player.x - en.x, player.y - en.y);
-                if (distPlayer < 25) {
-                    gameActive = false;
-                    alert("Fim de Jogo! Pontuação: " + score);
-                    location.reload();
-                }
-
-                // Colisão Inimigo vs Projétil
-                projectiles.forEach((p, pIdx) => {
-                    const dist = Math.hypot(p.x - en.x, p.y - en.y);
-                    if (dist < 20) {
-                        enemies.splice(enIdx, 1);
-                        projectiles.splice(pIdx, 1);
-                        score += 10;
-                        scoreElement.innerText = score;
-                    }
-                });
-            });
-        }
-
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Desenhar Jogador
-            ctx.fillStyle = player.color;
-            ctx.fillRect(player.x - 15, player.y - 15, 30, 30);
-
-            // Desenhar Projéteis
-            ctx.fillStyle = '#f1c40f';
-            projectiles.forEach(p => {
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
-                ctx.fill();
-            });
-
-            // Desenhar Inimigos
-            ctx.fillStyle = '#2ecc71';
-            enemies.forEach(en => {
-                ctx.fillRect(en.x - 15, en.y - 15, 30, 30);
-            });
-
-            requestAnimationFrame(() => {
-                update();
-                draw();
-            });
-        }
-
+    requestAnimationFrame(() => {
+        update();
         draw();
-    </script>
-</body>
-</html>                ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
-                ctx.fill();
-            });
+    });
+}
 
-            // Desenhar Inimigos
-            ctx.fillStyle = '#2ecc71';
-            enemies.forEach(en => {
-                ctx.fillRect(en.x - 15, en.y - 15, 30, 30);
-            });
-
-            requestAnimationFrame(() => {
-                update();
-                draw();
-            });
-        }
-
-        draw();
-    </script>
-</body>
-</html>
+draw();
