@@ -2,151 +2,159 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>eFootball Mini-Sim: Dream Team</title>
+    <title>FC 25: Card Evolution & Meta Simulator</title>
     <style>
-        body { background-color: #1a1a2e; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; overflow: hidden; }
-        #game-container { position: relative; margin-top: 20px; border: 4px solid #fbd400; border-radius: 10px; }
-        canvas { background: linear-gradient(to bottom, #4facfe 0%, #00f2fe 100%); cursor: crosshair; }
-        .ui-panel { background: rgba(0, 0, 50, 0.8); padding: 15px; border-radius: 0 0 10px 10px; width: 800px; display: flex; justify-content: space-between; }
-        .stats { color: #fbd400; font-weight: bold; }
-        .info-box { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.6); padding: 5px; font-size: 12px; }
-        h1 { margin-bottom: 5px; color: #fbd400; text-transform: uppercase; }
-        button { background: #fbd400; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer; border-radius: 5px; }
-        button:hover { background: #fff; }
+        :root {
+            --fc-gold: linear-gradient(135deg, #f5d061 0%, #e3a619 100%);
+            --fc-special: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            --fc-evo: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+            --bg-dark: #0a0a0c;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container { max-width: 900px; text-align: center; }
+
+        /* Estilo da Carta FC 25 */
+        .card {
+            width: 180px;
+            height: 260px;
+            background: var(--fc-gold);
+            border-radius: 10px;
+            position: relative;
+            color: #333;
+            display: inline-block;
+            margin: 10px;
+            transition: transform 0.3s;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            overflow: hidden;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .card.special { background: var(--fc-special); color: white; }
+        .card.evo { background: var(--fc-evo); color: white; border: 2px solid #fff; animation: glow 2s infinite; }
+
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px #4facfe; }
+            50% { box-shadow: 0 0 20px #00f2fe; }
+            100% { box-shadow: 0 0 5px #4facfe; }
+        }
+
+        .rating { position: absolute; top: 15px; left: 15px; font-size: 28px; font-weight: bold; }
+        .position { position: absolute; top: 45px; left: 15px; font-size: 14px; font-weight: bold; }
+        .name { position: absolute; top: 150px; width: 100%; text-align: center; font-weight: bold; text-transform: uppercase; }
+        .role { position: absolute; top: 175px; width: 100%; text-align: center; font-size: 11px; background: rgba(0,0,0,0.1); padding: 2px 0; }
+        .playstyle-plus { position: absolute; top: 200px; width: 100%; text-align: center; font-size: 10px; color: #d4af37; font-weight: bold; }
+
+        /* Interface */
+        .controls { margin-top: 30px; background: #1a1a1d; padding: 20px; border-radius: 15px; width: 100%; }
+        button {
+            background: #fff; border: none; padding: 10px 20px; font-weight: bold;
+            cursor: pointer; border-radius: 5px; margin: 5px; transition: 0.2s;
+        }
+        button:hover { background: #00f2fe; color: white; }
+        .stats-panel { margin-top: 10px; font-size: 14px; color: #aaa; }
+        
+        #squad { min-height: 280px; }
     </style>
 </head>
 <body>
 
-    <h1>eFootball: Dream Team Sim</h1>
-    
-    <div id="game-container">
-        <div class="info-box">Física Unreal Engine: Ativa | IA de Marcação: Automática</div>
-        <canvas id="gameCanvas" width="800" height="400"></canvas>
-    </div>
+    <div class="container">
+        <h1>FC 25 <span style="color: #00f2fe;">Evolutions</span></h1>
+        <p>Monte seu Dream Team e aplique Funções Plus (+)</p>
 
-    <div class="ui-panel">
-        <div>
-            <div>Moedas eFootball: <span id="coins" class="stats">100</span></div>
-            <div>Gols: <span id="score" class="stats">0</span></div>
+        <div id="squad">
+            </div>
+
+        <div class="controls">
+            <button onclick="openPack()">Abrir Pacote (Gaste 500 Coins)</button>
+            <button onclick="applyEvo()" style="background: #00f2fe; color: black;">Aplicar Evolução Meta</button>
+            <div class="stats-panel">
+                Coins: <span id="coins">2000</span> | Cartas no Clube: <span id="cardCount">0</span>
+            </div>
+            <p style="font-size: 12px; color: #666;">Dica: Cartas com Função Plus (+) dominam o meio-campo no FC 25.</p>
         </div>
-        <div id="msg">Clique no gol para chutar!</div>
-        <button onclick="resetGame()">Próxima Rodada (Gacha)</button>
     </div>
 
     <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const scoreEl = document.getElementById('score');
-        const coinsEl = document.getElementById('coins');
-        const msgEl = document.getElementById('msg');
+        let coins = 2000;
+        let myCards = [];
+        const names = ["Vini Jr", "Mbappé", "Bellingham", "Putellas", "Rodri", "Salah", "Hansen", "Musiala"];
+        const roles = ["Avançado", "Falso 9", "Fixo", "Box-to-Box", "Meia Ala", "Pivô"];
+        const playstyles = ["Finesse Shot+", "Anticipate+", "Rapid+", "Technical+", "Whipped Pass+"];
 
-        let score = 0;
-        let coins = 100;
-        let ball = { x: 400, y: 350, r: 15, targetX: 400, targetY: 350, shooting: false };
-        let keeper = { x: 400, y: 120, w: 60, h: 20, speed: 3 };
-        let goal = { x: 200, y: 80, w: 400, h: 100 };
+        function openPack() {
+            if (coins < 500) {
+                alert("Sem coins suficientes! Jogue o Division Rivals.");
+                return;
+            }
 
-        function drawField() {
-            // Gramado
-            ctx.fillStyle = '#2d5a27';
-            ctx.fillRect(0, 200, 800, 200);
+            coins -= 500;
+            document.getElementById('coins').innerText = coins;
+
+            const isSpecial = Math.random() > 0.8;
+            const card = {
+                id: Date.now(),
+                name: names[Math.floor(Math.random() * names.length)],
+                rating: Math.floor(Math.random() * (91 - 82) + 82),
+                role: roles[Math.floor(Math.random() * roles.length)],
+                psPlus: Math.random() > 0.5 ? playstyles[Math.floor(Math.random() * playstyles.length)] : "Nenhum",
+                type: isSpecial ? "special" : "gold",
+                hasPlus: Math.random() > 0.7
+            };
+
+            myCards.push(card);
+            renderCards();
+        }
+
+        function applyEvo() {
+            if (myCards.length === 0) return;
             
-            // Trave
-            ctx.strokeStyle = 'white';
-            ctx.lineWidth = 8;
-            ctx.strokeRect(goal.x, goal.y, goal.w, goal.h);
+            // Simula o sistema de Evo: Pega a última carta e melhora
+            let lastCard = myCards[myCards.length - 1];
+            if(lastCard.type === "evo") {
+                alert("Esta carta já atingiu o nível máximo de Evolução!");
+                return;
+            }
+
+            lastCard.rating += 3;
+            lastCard.type = "evo";
+            lastCard.hasPlus = true; // Ganha Função Plus+
+            lastCard.psPlus = playstyles[Math.floor(Math.random() * playstyles.length)];
             
-            // Marca do pênalti
-            ctx.beginPath();
-            ctx.arc(400, 350, 3, 0, Math.PI * 2);
-            ctx.fillStyle = "white";
-            ctx.fill();
+            renderCards();
+            alert(`Evolução concluída! ${lastCard.name} agora é Meta!`);
         }
 
-        function drawKeeper() {
-            ctx.fillStyle = '#ff4b2b';
-            ctx.fillRect(keeper.x - keeper.w/2, keeper.y, keeper.w, keeper.h);
-            // IA de marcação automática (segue a bola lateralmente)
-            if(!ball.shooting) {
-                keeper.x += keeper.speed;
-                if(keeper.x > 550 || keeper.x < 250) keeper.speed *= -1;
-            }
+        function renderCards() {
+            const squad = document.getElementById('squad');
+            const cardCount = document.getElementById('cardCount');
+            squad.innerHTML = '';
+            cardCount.innerText = myCards.length;
+
+            myCards.slice(-4).forEach(card => {
+                const cardEl = document.createElement('div');
+                cardEl.className = `card ${card.type}`;
+                
+                cardEl.innerHTML = `
+                    <div class="rating">${card.rating}</div>
+                    <div class="position">ATA</div>
+                    <div class="name">${card.name}</div>
+                    <div class="role">${card.role}${card.hasPlus ? ' <b>(+)</b>' : ''}</div>
+                    <div class="playstyle-plus">${card.psPlus !== 'Nenhum' ? '✦ ' + card.psPlus : ''}</div>
+                `;
+                squad.appendChild(cardEl);
+            });
         }
-
-        function drawBall() {
-            ctx.beginPath();
-            ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
-            ctx.fillStyle = "white";
-            ctx.fill();
-            ctx.strokeStyle = "black";
-            ctx.lineWidth = 2;
-            ctx.stroke();
-        }
-
-        function update() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawField();
-            drawKeeper();
-            drawBall();
-
-            if (ball.shooting) {
-                // Simulação da Física de Bola Fluida
-                ball.x += (ball.targetX - ball.x) * 0.1;
-                ball.y += (ball.targetY - ball.y) * 0.1;
-                ball.r *= 0.98; // Efeito de profundidade
-
-                // Colisão com Goleiro (IA Automática)
-                if (Math.abs(ball.x - keeper.x) < 40 && Math.abs(ball.y - keeper.y) < 20) {
-                    msgEl.innerText = "IA Automática defendeu!";
-                    resetBall();
-                }
-
-                // Verificação de Gol
-                if (ball.y <= goal.y + 10) {
-                    if (ball.x > goal.x && ball.x < goal.x + goal.w) {
-                        score++;
-                        coins += 50;
-                        scoreEl.innerText = score;
-                        coinsEl.innerText = coins;
-                        msgEl.innerText = "GOL! +50 Moedas (Evento Semanal)";
-                    } else {
-                        msgEl.innerText = "Fora! A física da bola é realista.";
-                    }
-                    resetBall();
-                }
-            }
-            requestAnimationFrame(update);
-        }
-
-        canvas.addEventListener('mousedown', (e) => {
-            if (ball.shooting) return;
-            const rect = canvas.getBoundingClientRect();
-            ball.targetX = e.clientX - rect.left;
-            ball.targetY = e.clientY - rect.top;
-            ball.shooting = true;
-        });
-
-        function resetBall() {
-            setTimeout(() => {
-                ball.x = 400;
-                ball.y = 350;
-                ball.r = 15;
-                ball.shooting = false;
-            }, 1000);
-        }
-
-        function resetGame() {
-            if(coins >= 100) {
-                coins -= 100;
-                coinsEl.innerText = coins;
-                msgEl.innerText = "Contratando lenda via Gacha...";
-                alert("Você tirou um jogador Épico! Atributos de chute aumentados.");
-            } else {
-                alert("Sem moedas. Complete eventos semanais!");
-            }
-        }
-
-        update();
     </script>
 </body>
 </html>
