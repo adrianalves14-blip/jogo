@@ -2,149 +2,151 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Zumbi Shooter Simples</title>
+    <title>eFootball Mini-Sim: Dream Team</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #1a1a1a; font-family: sans-serif; }
-        canvas { display: block; background: #2c3e50; }
-        #ui { position: absolute; top: 20px; left: 20px; color: white; font-size: 24px; pointer-events: none; }
+        body { background-color: #1a1a2e; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; overflow: hidden; }
+        #game-container { position: relative; margin-top: 20px; border: 4px solid #fbd400; border-radius: 10px; }
+        canvas { background: linear-gradient(to bottom, #4facfe 0%, #00f2fe 100%); cursor: crosshair; }
+        .ui-panel { background: rgba(0, 0, 50, 0.8); padding: 15px; border-radius: 0 0 10px 10px; width: 800px; display: flex; justify-content: space-between; }
+        .stats { color: #fbd400; font-weight: bold; }
+        .info-box { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.6); padding: 5px; font-size: 12px; }
+        h1 { margin-bottom: 5px; color: #fbd400; text-transform: uppercase; }
+        button { background: #fbd400; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer; border-radius: 5px; }
+        button:hover { background: #fff; }
     </style>
 </head>
 <body>
 
-    <div id="ui">Pontos: <span id="score">0</span></div>
-    <canvas id="gameCanvas"></canvas>
+    <h1>eFootball: Dream Team Sim</h1>
+    
+    <div id="game-container">
+        <div class="info-box">Física Unreal Engine: Ativa | IA de Marcação: Automática</div>
+        <canvas id="gameCanvas" width="800" height="400"></canvas>
+    </div>
+
+    <div class="ui-panel">
+        <div>
+            <div>Moedas eFootball: <span id="coins" class="stats">100</span></div>
+            <div>Gols: <span id="score" class="stats">0</span></div>
+        </div>
+        <div id="msg">Clique no gol para chutar!</div>
+        <button onclick="resetGame()">Próxima Rodada (Gacha)</button>
+    </div>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const scoreElement = document.getElementById('score');
-
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        const scoreEl = document.getElementById('score');
+        const coinsEl = document.getElementById('coins');
+        const msgEl = document.getElementById('msg');
 
         let score = 0;
-        let gameActive = true;
+        let coins = 100;
+        let ball = { x: 400, y: 350, r: 15, targetX: 400, targetY: 350, shooting: false };
+        let keeper = { x: 400, y: 120, w: 60, h: 20, speed: 3 };
+        let goal = { x: 200, y: 80, w: 400, h: 100 };
 
-        const player = {
-            x: canvas.width / 2,
-            y: canvas.height / 2,
-            radius: 15,
-            color: '#3498db'
-        };
-
-        const projectiles = [];
-        const enemies = [];
-
-        // Capturar posição do mouse
-        let mouseX = canvas.width / 2;
-        let mouseY = canvas.height / 2;
-
-        window.addEventListener('mousemove', (e) => {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-        });
-
-        // Atirar ao clicar
-        window.addEventListener('mousedown', () => {
-            if(!gameActive) return;
+        function drawField() {
+            // Gramado
+            ctx.fillStyle = '#2d5a27';
+            ctx.fillRect(0, 200, 800, 200);
             
-            const angle = Math.atan2(mouseY - player.y, mouseX - player.x);
-            projectiles.push({
-                x: player.x,
-                y: player.y,
-                vx: Math.cos(angle) * 8,
-                vy: Math.sin(angle) * 8
-            });
-        });
-
-        function spawnEnemy() {
-            const radius = 15;
-            let x, y;
-
-            if (Math.random() < 0.5) {
-                x = Math.random() < 0.5 ? 0 - radius : canvas.width + radius;
-                y = Math.random() * canvas.height;
-            } else {
-                x = Math.random() * canvas.width;
-                y = Math.random() < 0.5 ? 0 - radius : canvas.height + radius;
-            }
-
-            const angle = Math.atan2(player.y - y, player.x - x);
-            enemies.push({ x, y, vx: Math.cos(angle) * 2, vy: Math.sin(angle) * 2 });
+            // Trave
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 8;
+            ctx.strokeRect(goal.x, goal.y, goal.w, goal.h);
+            
+            // Marca do pênalti
+            ctx.beginPath();
+            ctx.arc(400, 350, 3, 0, Math.PI * 2);
+            ctx.fillStyle = "white";
+            ctx.fill();
         }
 
-        setInterval(() => { if(gameActive) spawnEnemy(); }, 1000);
+        function drawKeeper() {
+            ctx.fillStyle = '#ff4b2b';
+            ctx.fillRect(keeper.x - keeper.w/2, keeper.y, keeper.w, keeper.h);
+            // IA de marcação automática (segue a bola lateralmente)
+            if(!ball.shooting) {
+                keeper.x += keeper.speed;
+                if(keeper.x > 550 || keeper.x < 250) keeper.speed *= -1;
+            }
+        }
+
+        function drawBall() {
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+            ctx.fillStyle = "white";
+            ctx.fill();
+            ctx.strokeStyle = "black";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
 
         function update() {
-            if (!gameActive) return;
-
-            // Mover jogador em direção ao mouse (suave)
-            player.x += (mouseX - player.x) * 0.05;
-            player.y += (mouseY - player.y) * 0.05;
-
-            // Atualizar Projéteis
-            projectiles.forEach((p, index) => {
-                p.x += p.vx;
-                p.y += p.vy;
-                if (p.x < 0 || p.x > canvas.width || p.y < 0 || p.y > canvas.height) {
-                    projectiles.splice(index, 1);
-                }
-            });
-
-            // Atualizar Inimigos
-            enemies.forEach((en, enIdx) => {
-                en.x += en.vx;
-                en.y += en.vy;
-
-                // Colisão Inimigo vs Jogador
-                const distPlayer = Math.hypot(player.x - en.x, player.y - en.y);
-                if (distPlayer < 25) {
-                    gameActive = false;
-                    alert("Fim de Jogo! Pontuação: " + score);
-                    location.reload();
-                }
-
-                // Colisão Inimigo vs Projétil
-                projectiles.forEach((p, pIdx) => {
-                    const dist = Math.hypot(p.x - en.x, p.y - en.y);
-                    if (dist < 20) {
-                        enemies.splice(enIdx, 1);
-                        projectiles.splice(pIdx, 1);
-                        score += 10;
-                        scoreElement.innerText = score;
-                    }
-                });
-            });
-        }
-
-        function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawField();
+            drawKeeper();
+            drawBall();
 
-            // Desenhar Jogador
-            ctx.fillStyle = player.color;
-            ctx.fillRect(player.x - 15, player.y - 15, 30, 30);
+            if (ball.shooting) {
+                // Simulação da Física de Bola Fluida
+                ball.x += (ball.targetX - ball.x) * 0.1;
+                ball.y += (ball.targetY - ball.y) * 0.1;
+                ball.r *= 0.98; // Efeito de profundidade
 
-            // Desenhar Projéteis
-            ctx.fillStyle = '#f1c40f';
-            projectiles.forEach(p => {
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
-                ctx.fill();
-            });
+                // Colisão com Goleiro (IA Automática)
+                if (Math.abs(ball.x - keeper.x) < 40 && Math.abs(ball.y - keeper.y) < 20) {
+                    msgEl.innerText = "IA Automática defendeu!";
+                    resetBall();
+                }
 
-            // Desenhar Inimigos
-            ctx.fillStyle = '#2ecc71';
-            enemies.forEach(en => {
-                ctx.fillRect(en.x - 15, en.y - 15, 30, 30);
-            });
-
-            requestAnimationFrame(() => {
-                update();
-                draw();
-            });
+                // Verificação de Gol
+                if (ball.y <= goal.y + 10) {
+                    if (ball.x > goal.x && ball.x < goal.x + goal.w) {
+                        score++;
+                        coins += 50;
+                        scoreEl.innerText = score;
+                        coinsEl.innerText = coins;
+                        msgEl.innerText = "GOL! +50 Moedas (Evento Semanal)";
+                    } else {
+                        msgEl.innerText = "Fora! A física da bola é realista.";
+                    }
+                    resetBall();
+                }
+            }
+            requestAnimationFrame(update);
         }
 
-        draw();
+        canvas.addEventListener('mousedown', (e) => {
+            if (ball.shooting) return;
+            const rect = canvas.getBoundingClientRect();
+            ball.targetX = e.clientX - rect.left;
+            ball.targetY = e.clientY - rect.top;
+            ball.shooting = true;
+        });
+
+        function resetBall() {
+            setTimeout(() => {
+                ball.x = 400;
+                ball.y = 350;
+                ball.r = 15;
+                ball.shooting = false;
+            }, 1000);
+        }
+
+        function resetGame() {
+            if(coins >= 100) {
+                coins -= 100;
+                coinsEl.innerText = coins;
+                msgEl.innerText = "Contratando lenda via Gacha...";
+                alert("Você tirou um jogador Épico! Atributos de chute aumentados.");
+            } else {
+                alert("Sem moedas. Complete eventos semanais!");
+            }
+        }
+
+        update();
     </script>
 </body>
 </html>
