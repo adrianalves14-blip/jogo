@@ -2,159 +2,194 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>FC 25: Card Evolution & Meta Simulator</title>
+    <title>FC 25: Brasil & World Cup Edition</title>
     <style>
         :root {
             --fc-gold: linear-gradient(135deg, #f5d061 0%, #e3a619 100%);
-            --fc-special: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            --fc-evo: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
-            --bg-dark: #0a0a0c;
+            --fc-wc: linear-gradient(135deg, #7f0e19 0%, #bf9b30 100%);
+            --fc-br: linear-gradient(135deg, #009739 0%, #fedd00 100%);
+            --bg-dark: #0a0a0a;
         }
 
         body {
             background-color: var(--bg-dark);
             color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Verdana', sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
+            margin: 0;
             padding: 20px;
         }
 
-        .container { max-width: 900px; text-align: center; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .currency { font-size: 24px; color: #fbd400; font-weight: bold; margin: 10px 0; }
 
-        /* Estilo da Carta FC 25 */
+        /* Container de Cartas */
+        #squad {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            perspective: 1000px;
+        }
+
+        /* Design da Carta */
         .card {
-            width: 180px;
-            height: 260px;
-            background: var(--fc-gold);
-            border-radius: 10px;
+            width: 190px;
+            height: 270px;
+            border-radius: 15px;
             position: relative;
-            color: #333;
-            display: inline-block;
-            margin: 10px;
-            transition: transform 0.3s;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
             overflow: hidden;
-            border: 2px solid rgba(255,255,255,0.2);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.4s;
         }
 
-        .card.special { background: var(--fc-special); color: white; }
-        .card.evo { background: var(--fc-evo); color: white; border: 2px solid #fff; animation: glow 2s infinite; }
+        .card:hover { transform: scale(1.05) rotateY(5deg); }
 
-        @keyframes glow {
-            0% { box-shadow: 0 0 5px #4facfe; }
-            50% { box-shadow: 0 0 20px #00f2fe; }
-            100% { box-shadow: 0 0 5px #4facfe; }
-        }
+        /* Variantes de Cartas */
+        .gold { background: var(--fc-gold); color: #222; }
+        .world-cup { background: var(--fc-wc); color: white; border: 2px solid #bf9b30; }
+        .brasileirao { background: var(--fc-br); color: #004517; }
 
-        .rating { position: absolute; top: 15px; left: 15px; font-size: 28px; font-weight: bold; }
-        .position { position: absolute; top: 45px; left: 15px; font-size: 14px; font-weight: bold; }
-        .name { position: absolute; top: 150px; width: 100%; text-align: center; font-weight: bold; text-transform: uppercase; }
-        .role { position: absolute; top: 175px; width: 100%; text-align: center; font-size: 11px; background: rgba(0,0,0,0.1); padding: 2px 0; }
-        .playstyle-plus { position: absolute; top: 200px; width: 100%; text-align: center; font-size: 10px; color: #d4af37; font-weight: bold; }
-
-        /* Interface */
-        .controls { margin-top: 30px; background: #1a1a1d; padding: 20px; border-radius: 15px; width: 100%; }
-        button {
-            background: #fff; border: none; padding: 10px 20px; font-weight: bold;
-            cursor: pointer; border-radius: 5px; margin: 5px; transition: 0.2s;
-        }
-        button:hover { background: #00f2fe; color: white; }
-        .stats-panel { margin-top: 10px; font-size: 14px; color: #aaa; }
+        .rating { position: absolute; top: 10px; left: 15px; font-size: 28px; font-weight: bold; }
+        .pos { position: absolute; top: 40px; left: 15px; font-size: 14px; font-weight: bold; }
         
-        #squad { min-height: 280px; }
+        .photo {
+            width: 100%;
+            height: 180px;
+            object-fit: contain;
+            margin-top: 10px;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
+        }
+
+        .info {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 90px;
+            background: rgba(0,0,0,0.15);
+            backdrop-filter: blur(5px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .name { font-size: 16px; font-weight: bold; text-transform: uppercase; }
+        .role-plus { font-size: 11px; font-style: italic; margin-top: 4px; }
+
+        /* Controles */
+        .shop {
+            margin-top: 40px;
+            padding: 20px;
+            background: #1a1a1a;
+            border-radius: 15px;
+            display: flex;
+            gap: 15px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: 0.3s;
+        }
+
+        .btn-pack { background: #fbd400; color: black; }
+        .btn-pack:hover { background: white; }
+
+        .footer-info { margin-top: 15px; font-size: 12px; color: #555; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>FC 25 <span style="color: #00f2fe;">Evolutions</span></h1>
-        <p>Monte seu Dream Team e aplique Funções Plus (+)</p>
-
-        <div id="squad">
-            </div>
-
-        <div class="controls">
-            <button onclick="openPack()">Abrir Pacote (Gaste 500 Coins)</button>
-            <button onclick="applyEvo()" style="background: #00f2fe; color: black;">Aplicar Evolução Meta</button>
-            <div class="stats-panel">
-                Coins: <span id="coins">2000</span> | Cartas no Clube: <span id="cardCount">0</span>
-            </div>
-            <p style="font-size: 12px; color: #666;">Dica: Cartas com Função Plus (+) dominam o meio-campo no FC 25.</p>
-        </div>
+    <div class="header">
+        <h1>FC 25 <span style="color: #bf9b30;">GLOBAL EDITION</span></h1>
+        <div class="currency">COINS: <span id="coin-count">2500</span></div>
     </div>
 
+    <div id="squad">
+        </div>
+
+    <div class="shop">
+        <button class="btn-pack" onclick="buyPack('br')">Pack Brasileirão (400)</button>
+        <button class="btn-pack" onclick="buyPack('wc')">Pack Copa do Mundo (600)</button>
+        <button class="btn-pack" style="background: #eee;" onclick="location.reload()">Resetar</button>
+    </div>
+
+    <div class="footer-info">Sistema de Funções Plus (+) Ativo | Database Masculina 2025/26</div>
+
     <script>
-        let coins = 2000;
-        let myCards = [];
-        const names = ["Vini Jr", "Mbappé", "Bellingham", "Putellas", "Rodri", "Salah", "Hansen", "Musiala"];
-        const roles = ["Avançado", "Falso 9", "Fixo", "Box-to-Box", "Meia Ala", "Pivô"];
-        const playstyles = ["Finesse Shot+", "Anticipate+", "Rapid+", "Technical+", "Whipped Pass+"];
+        let coins = 2500;
+        
+        // Database de Jogadores
+        const players = {
+            br: [
+                { name: "Arrascaeta", rat: 84, pos: "MEI", role: "Criador+", type: "brasileirao", img: "https://s2-ge.glbimg.com/O6LOf7F97jI_k7Nf9X-u69Z1h3o=/0x0:3000x2000/984x0/smart/filters:strip_icc()/i.s3.glbimg.com/v1/AUTH_bc8228b6673f488aa253bb1829c55011/internal_photos/bs/2024/k/Q/YFhV6vS7uPzFf9q9w6pA/2024-02-15t225304z-1160359873-rc2e86axz5p4-rtrmadp-3-soccer-brazil-fla-ban-report.jpg" },
+                { name: "Hulk", rat: 83, pos: "ATA", role: "Pivô+", type: "brasileirao", img: "https://p2.trrsf.com/image/fget/cf/1200/1200/middle/images.terra.com/2023/11/02/1078712790-hulk-atletico-mg.jpg" },
+                { name: "Everton Ribeiro", rat: 81, pos: "MEI", role: "Playmaker+", type: "brasileirao", img: "https://static.gazetadopovo.com.br/esportes/2024/01/07172033/everton-ribeiro-bahia-960x540.jpg" },
+                { name: "Alan Patrick", rat: 82, pos: "MEI", role: "Enganche+", type: "brasileirao", img: "https://s2-ge.glbimg.com/QvY2rX96eQ09uGZp6n7tH-vG9W0=/0x0:1080x1350/984x0/smart/filters:strip_icc()/i.s3.glbimg.com/v1/AUTH_bc8228b6673f488aa253bb1829c55011/internal_photos/bs/2023/X/l/Wz9z19SRq9pA9z9z9z9z/alan-patrick.jpg" },
+                { name: "Lucas Moura", rat: 82, pos: "ATA", role: "Velocista+", type: "brasileirao", img: "https://lncimg.lance.com.br/cdn-cgi/image/width=1920,height=1080,quality=75,format=webp/uploads/2023/08/lucas-moura-sao-paulo-apresentacao-1691079543141_v2_1200x675.jpg" }
+            ],
+            wc: [
+                { name: "Pelé", rat: 98, pos: "ATA", role: "Lenda+", type: "world-cup", img: "https://upload.wikimedia.org/wikipedia/commons/5/54/Pel%C3%A9_by_John_Mathew_Smith.jpg" },
+                { name: "Zidane", rat: 96, pos: "MEI", role: "Maestro+", type: "world-cup", img: "https://upload.wikimedia.org/wikipedia/commons/f/f3/Zinedine_Zidane_by_Tasnim_01.jpg" },
+                { name: "Maradona", rat: 97, pos: "MEI", role: "Driblador+", type: "world-cup", img: "https://upload.wikimedia.org/wikipedia/commons/2/2c/Maradona-Mundial_86.jpg" },
+                { name: "Ronaldo", rat: 96, pos: "ATA", role: "Finalizador+", type: "world-cup", img: "https://s2-ge.glbimg.com/O6LOf7F97jI_k7Nf9X-u69Z1h3o=/0x0:1000x1000/smart/filters:strip_icc()/i.s3.glbimg.com/v1/AUTH_bc8228b6673f488aa253bb1829c55011/internal_photos/bs/2022/b/m/1Hl8zRTSA4zRTSA4zRTS/ronaldo.jpg" },
+                { name: "Mbappé", rat: 92, pos: "ATA", role: "Infiltrado+", type: "world-cup", img: "https://s2-ge.glbimg.com/O6LOf7F97jI_k7Nf9X-u69Z1h3o=/0x0:3000x2000/smart/filters:strip_icc()/i.s3.glbimg.com/v1/AUTH_bc8228b6673f488aa253bb1829c55011/internal_photos/bs/2022/j/k/9m9z9z9z9z9z9z9z9z9z/mbappe.jpg" }
+            ]
+        };
 
-        function openPack() {
-            if (coins < 500) {
-                alert("Sem coins suficientes! Jogue o Division Rivals.");
+        function buyPack(category) {
+            const cost = category === 'br' ? 400 : 600;
+            
+            if (coins < cost) {
+                alert("Moedas insuficientes!");
                 return;
             }
 
-            coins -= 500;
-            document.getElementById('coins').innerText = coins;
+            coins -= cost;
+            document.getElementById('coin-count').innerText = coins;
 
-            const isSpecial = Math.random() > 0.8;
-            const card = {
-                id: Date.now(),
-                name: names[Math.floor(Math.random() * names.length)],
-                rating: Math.floor(Math.random() * (91 - 82) + 82),
-                role: roles[Math.floor(Math.random() * roles.length)],
-                psPlus: Math.random() > 0.5 ? playstyles[Math.floor(Math.random() * playstyles.length)] : "Nenhum",
-                type: isSpecial ? "special" : "gold",
-                hasPlus: Math.random() > 0.7
-            };
-
-            myCards.push(card);
-            renderCards();
+            // Seleciona um jogador aleatório da categoria
+            const pool = players[category];
+            const player = pool[Math.floor(Math.random() * pool.length)];
+            
+            createCard(player);
         }
 
-        function applyEvo() {
-            if (myCards.length === 0) return;
-            
-            // Simula o sistema de Evo: Pega a última carta e melhora
-            let lastCard = myCards[myCards.length - 1];
-            if(lastCard.type === "evo") {
-                alert("Esta carta já atingiu o nível máximo de Evolução!");
-                return;
-            }
-
-            lastCard.rating += 3;
-            lastCard.type = "evo";
-            lastCard.hasPlus = true; // Ganha Função Plus+
-            lastCard.psPlus = playstyles[Math.floor(Math.random() * playstyles.length)];
-            
-            renderCards();
-            alert(`Evolução concluída! ${lastCard.name} agora é Meta!`);
-        }
-
-        function renderCards() {
+        function createCard(p) {
             const squad = document.getElementById('squad');
-            const cardCount = document.getElementById('cardCount');
-            squad.innerHTML = '';
-            cardCount.innerText = myCards.length;
-
-            myCards.slice(-4).forEach(card => {
-                const cardEl = document.createElement('div');
-                cardEl.className = `card ${card.type}`;
-                
-                cardEl.innerHTML = `
-                    <div class="rating">${card.rating}</div>
-                    <div class="position">ATA</div>
-                    <div class="name">${card.name}</div>
-                    <div class="role">${card.role}${card.hasPlus ? ' <b>(+)</b>' : ''}</div>
-                    <div class="playstyle-plus">${card.psPlus !== 'Nenhum' ? '✦ ' + card.psPlus : ''}</div>
-                `;
-                squad.appendChild(cardEl);
-            });
+            const card = document.createElement('div');
+            card.className = `card ${p.type}`;
+            
+            card.innerHTML = `
+                <div class="rating">${p.rat}</div>
+                <div class="pos">${p.pos}</div>
+                <img src="${p.img}" class="photo" alt="${p.name}">
+                <div class="info">
+                    <div class="name">${p.name}</div>
+                    <div class="role-plus">Função: ${p.role}</div>
+                </div>
+            `;
+            
+            // Adiciona no início da lista
+            squad.prepend(card);
+            
+            // Limita a exibição para não quebrar o layout (opcional)
+            if(squad.children.length > 8) squad.lastChild.remove();
         }
+
+        // Carregar um jogador inicial
+        window.onload = () => {
+            createCard(players.br[0]);
+        };
     </script>
 </body>
 </html>
