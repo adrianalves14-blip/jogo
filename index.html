@@ -2,6 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FC 25: Ultimate Edition - Brasil & World Cup</title>
     <style>
         :root {
@@ -20,7 +21,10 @@
             align-items: center;
             margin: 0;
             padding: 20px;
+            overflow-x: hidden;
         }
+
+        h1 { font-style: italic; text-shadow: 0 0 10px rgba(251, 212, 0, 0.5); }
 
         .currency-hub {
             background: #111;
@@ -29,6 +33,7 @@
             border: 2px solid #333;
             margin-bottom: 30px;
             box-shadow: 0 0 20px rgba(251, 212, 0, 0.2);
+            font-size: 18px;
         }
 
         .currency-hub span { color: #fbd400; font-size: 24px; }
@@ -37,10 +42,11 @@
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 20px;
-            min-height: 400px;
+            gap: 25px;
+            min-height: 350px;
             width: 100%;
             max-width: 1200px;
+            padding: 20px;
         }
 
         /* Estrutura da Carta FC 25 */
@@ -49,45 +55,49 @@
             height: 310px;
             border-radius: 15px;
             position: relative;
-            overflow: hidden;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.7);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.8);
             border: 1px solid rgba(255,255,255,0.2);
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             animation: cardAppear 0.5s ease-out;
+            overflow: hidden; /* Mantém a foto dentro dos limites arredondados */
         }
 
         @keyframes cardAppear {
-            from { opacity: 0; transform: scale(0.5) translateY(50px); }
+            from { opacity: 0; transform: scale(0.8) translateY(30px); }
             to { opacity: 1; transform: scale(1) translateY(0); }
         }
 
-        .fc-card:hover { transform: scale(1.05); z-index: 10; }
+        .fc-card:hover { transform: scale(1.05) rotate(1deg); z-index: 10; }
 
-        /* Estilos de Fundo */
+        /* Estilos de Fundo Temáticos */
         .br-theme { background: var(--br-card); color: #004517; }
         .wc-theme { background: var(--wc-card); color: #fff; border: 2px solid #bf9b30; }
 
-        .card-rtg { position: absolute; top: 15px; left: 20px; font-size: 36px; line-height: 0.8; }
-        .card-pos { position: absolute; top: 50px; left: 20px; font-size: 16px; opacity: 0.8; }
+        /* Infos Superiores */
+        .card-rtg { position: absolute; top: 15px; left: 15px; font-size: 42px; font-weight: 900; line-height: 0.8; z-index: 4; }
+        .card-pos { position: absolute; top: 55px; left: 17px; font-size: 18px; font-weight: bold; opacity: 0.9; z-index: 4; }
 
+        /* Foto do Jogador */
         .player-photo {
-            width: 190px;
-            height: 190px;
+            width: 260px; /* Maior para preencher bem a carta */
+            height: 260px;
             position: absolute;
-            top: 25px;
-            right: -15px;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-40%); /* Leve deslocamento para o lado estilo FIFA */
             object-fit: contain;
             filter: drop-shadow(0 10px 15px rgba(0,0,0,0.6));
             z-index: 2;
         }
 
+        /* Rodapé com nome e Playstyles */
         .card-footer {
             position: absolute;
             bottom: 0;
             width: 100%;
-            height: 110px;
-            background: rgba(0,0,0,0.3);
-            backdrop-filter: blur(8px);
+            height: 105px;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -96,13 +106,13 @@
             border-top: 1px solid rgba(255,255,255,0.1);
         }
 
-        .p-name { font-size: 18px; text-transform: uppercase; letter-spacing: -1px; margin-bottom: 5px; }
-        .p-role { font-size: 10px; background: rgba(255,255,255,0.2); padding: 3px 10px; border-radius: 20px; }
-        .p-psplus { font-size: 11px; color: #fbd400; margin-top: 8px; }
+        .p-name { font-size: 20px; text-transform: uppercase; letter-spacing: -1px; margin-bottom: 2px; color: white !important; }
+        .p-role { font-size: 11px; background: rgba(255,255,255,0.2); color: white; padding: 2px 12px; border-radius: 20px; }
+        .p-psplus { font-size: 12px; color: #fbd400; margin-top: 8px; font-weight: bold; }
 
-        /* Controles */
+        /* Controles de Compra */
         .pack-area {
-            margin-top: 50px;
+            margin-top: 40px;
             display: flex;
             gap: 20px;
         }
@@ -111,22 +121,24 @@
             background: #fbd400;
             color: black;
             border: none;
-            padding: 15px 30px;
+            padding: 18px 35px;
             font-size: 16px;
             font-weight: bold;
-            border-radius: 10px;
+            border-radius: 12px;
             cursor: pointer;
             text-transform: uppercase;
-            box-shadow: 0 5px 0 #b39700;
+            box-shadow: 0 6px 0 #b39700;
+            transition: 0.1s;
         }
 
-        .btn-buy:active { transform: translateY(3px); box-shadow: 0 2px 0 #b39700; }
+        .btn-buy:active { transform: translateY(4px); box-shadow: 0 2px 0 #b39700; }
+        .btn-buy:hover { filter: brightness(1.1); }
         .btn-buy:disabled { background: #444; color: #888; box-shadow: none; cursor: not-allowed; }
     </style>
 </head>
 <body>
 
-    <h1 style="font-style: italic;">FC<span style="color:#fbd400">25</span> MENS DATABASE</h1>
+    <h1>FC<span style="color:#fbd400">25</span> ULTIMATE DATABASE</h1>
     
     <div class="currency-hub">
         COINS: <span id="coin-display">2500</span>
@@ -137,32 +149,33 @@
 
     <div class="pack-area">
         <button class="btn-buy" onclick="openPack('br')">Pack Brasileirão (500)</button>
-        <button class="btn-buy" style="background:#8a1538; color:white; box-shadow: 0 5px 0 #4a0a1d;" onclick="openPack('wc')">Pack Copa Lendas (800)</button>
+        <button class="btn-buy" style="background:#8a1538; color:white; box-shadow: 0 6px 0 #4a0a1d;" onclick="openPack('wc')">Pack Copa Lendas (800)</button>
     </div>
 
     <script>
         let coins = 2500;
 
+        // Banco de dados com URLs de imagens mais limpas
         const database = {
             br: [
-                { name: "Arrascaeta", rtg: 84, pos: "MEI", role: "Criador+", ps: "Passagem Incisiva+", theme: "br-theme", img: "https://p2.trrsf.com/image/fget/cf/940/0/images.terra.com/2023/12/10/1888998086-arrascaeta.jpg" },
-                { name: "Hulk", rtg: 83, pos: "ATA", role: "Pivô+", ps: "Chute Potente+", theme: "br-theme", img: "https://lncimg.lance.com.br/cdn-cgi/image/width=1920,height=1080,quality=75,format=webp/uploads/2024/03/hulk-atletico-mg.jpg" },
-                { name: "Lucas Moura", rtg: 82, pos: "ATA", role: "Infiltrado+", ps: "Veloz+", theme: "br-theme", img: "https://lncimg.lance.com.br/cdn-cgi/image/width=1920,height=1080,quality=75,format=webp/uploads/2023/08/lucas-moura-sao-paulo.jpg" },
-                { name: "Alan Patrick", rtg: 81, pos: "MEI", role: "Playmaker+", ps: "Tiki-Taka+", theme: "br-theme", img: "https://s2-ge.glbimg.com/QvY2rX96eQ09uGZp6n7tH-vG9W0=/0x0:1080x1350/984x0/smart/filters:strip_icc()/i.s3.glbimg.com/v1/AUTH_bc8228b6673f488aa253bb1829c55011/internal_photos/bs/2023/X/l/Wz9z19SRq9pA9z9z9z9z/alan-patrick.jpg" },
-                { name: "Estêvão", rtg: 80, pos: "PD", role: "Pontal+", ps: "Técnico+", theme: "br-theme", img: "https://lncimg.lance.com.br/cdn-cgi/image/width=1920,height=1080,quality=75,format=webp/uploads/2024/06/Estevao-Palmeiras.jpg" }
+                { name: "Arrascaeta", rtg: 84, pos: "MEI", role: "Criador+", ps: "Passagem Incisiva+", theme: "br-theme", img: "https://api.fifaroster.com/assets/players/fifa24/dynamic/212218.png" },
+                { name: "Hulk", rtg: 83, pos: "ATA", role: "Pivô+", ps: "Chute Potente+", theme: "br-theme", img: "https://api.fifaroster.com/assets/players/fifa23/dynamic/189362.png" },
+                { name: "Lucas Moura", rtg: 82, pos: "ATA", role: "Infiltrado+", ps: "Veloz+", theme: "br-theme", img: "https://api.fifaroster.com/assets/players/fifa24/dynamic/191054.png" },
+                { name: "Alan Patrick", rtg: 81, pos: "MEI", role: "Playmaker+", ps: "Tiki-Taka+", theme: "br-theme", img: "https://api.fifaroster.com/assets/players/fifa23/dynamic/199069.png" },
+                { name: "Estêvão", rtg: 80, pos: "PD", role: "Pontal+", ps: "Técnico+", theme: "br-theme", img: "https://api.fifaroster.com/assets/players/fifa24/dynamic/276324.png" }
             ],
             wc: [
-                { name: "Pelé", rtg: 98, pos: "ATA", role: "Lenda+", ps: "Finalização Perfeita+", theme: "wc-theme", img: "https://upload.wikimedia.org/wikipedia/commons/5/54/Pel%C3%A9_by_John_Mathew_Smith.jpg" },
-                { name: "Ronaldo", rtg: 96, pos: "ATA", role: "Avançado+", ps: "Arrancada+", theme: "wc-theme", img: "https://conteudo.imguol.com.br/c/esporte/7b/2022/11/04/ronaldo-fenomeno-comemora-gol-pela-selecao-brasileira-na-copa-de-2002-1667590886638_v2_3x4.jpg" },
-                { name: "Maradona", rtg: 97, pos: "MEI", role: "Driblador+", ps: "Mestre do Drible+", theme: "wc-theme", img: "https://upload.wikimedia.org/wikipedia/commons/2/2c/Maradona-Mundial_86.jpg" },
-                { name: "Zidane", rtg: 96, pos: "MEI", role: "Maestro+", ps: "Controle de Bola+", theme: "wc-theme", img: "https://upload.wikimedia.org/wikipedia/commons/f/f3/Zinedine_Zidane_by_Tasnim_01.jpg" },
-                { name: "Messi", rtg: 94, pos: "PD", role: "Falso 9+", ps: "Colocado+", theme: "wc-theme", img: "https://lncimg.lance.com.br/cdn-cgi/image/width=1920,height=1080,quality=75,format=webp/uploads/2022/12/03/638bb39c6e594.jpeg" }
+                { name: "Pelé", rtg: 98, pos: "ATA", role: "Lenda+", ps: "Finalização Perfeita+", theme: "wc-theme", img: "https://api.fifaroster.com/assets/players/fifa24/dynamic/237064.png" },
+                { name: "Ronaldo", rtg: 96, pos: "ATA", role: "Avançado+", ps: "Arrancada+", theme: "wc-theme", img: "https://api.fifaroster.com/assets/players/fifa24/dynamic/237067.png" },
+                { name: "Maradona", rtg: 97, pos: "MEI", role: "Driblador+", ps: "Mestre do Drible+", theme: "wc-theme", img: "https://api.fifaroster.com/assets/players/fifa22/dynamic/190158.png" },
+                { name: "Zidane", rtg: 96, pos: "MEI", role: "Maestro+", ps: "Controle de Bola+", theme: "wc-theme", img: "https://api.fifaroster.com/assets/players/fifa24/dynamic/2156.png" },
+                { name: "Messi", rtg: 94, pos: "PD", role: "Falso 9+", ps: "Colocado+", theme: "wc-theme", img: "https://api.fifaroster.com/assets/players/fifa24/dynamic/158023.png" }
             ]
         };
 
         function openPack(type) {
             const cost = type === 'br' ? 500 : 800;
-            if (coins < cost) return alert("Coins insuficientes!");
+            if (coins < cost) return alert("Você precisa de mais coins!");
 
             coins -= cost;
             document.getElementById('coin-display').innerText = coins;
@@ -181,7 +194,7 @@
             card.innerHTML = `
                 <div class="card-rtg">${p.rtg}</div>
                 <div class="card-pos">${p.pos}</div>
-                <img src="${p.img}" class="player-photo" onerror="this.src='https://via.placeholder.com/200x200?text=Player'">
+                <img src="${p.img}" class="player-photo" onerror="this.src='https://www.pngall.com/wp-content/uploads/5/Profile-Avatar-PNG.png'">
                 <div class="card-footer">
                     <div class="p-name">${p.name}</div>
                     <div class="p-role">${p.role}</div>
@@ -190,10 +203,14 @@
             `;
 
             grid.prepend(card);
-            if (grid.children.length > 5) grid.lastChild.remove();
+            
+            // Limita a exibição às últimas 5 cartas para não poluir a tela
+            if (grid.children.length > 5) {
+                grid.removeChild(grid.lastChild);
+            }
         }
 
-        // Jogador inicial (Arrascaeta)
+        // Carrega um jogador inicial ao abrir a página
         window.onload = () => addCardToGrid(database.br[0]);
     </script>
 </body>
